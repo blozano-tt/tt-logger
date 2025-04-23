@@ -104,6 +104,19 @@ private:
 #define TT_LOG_ERROR_CAT(category, ...)    TT_LOG_IMPL(error, category, __VA_ARGS__)
 #define TT_LOG_CRITICAL_CAT(category, ...) TT_LOG_IMPL(critical, category, __VA_ARGS__)
 
+// Fatal logging macros that terminate the program
+#define TT_LOG_FATAL(...) \
+    do { \
+        TT_LOG_CRITICAL(__VA_ARGS__); \
+        std::exit(EXIT_FAILURE); \
+    } while(0)
+
+#define TT_LOG_FATAL_CAT(category, ...) \
+    do { \
+        TT_LOG_CRITICAL_CAT(category, __VA_ARGS__); \
+        std::exit(EXIT_FAILURE); \
+    } while(0)
+
 } // namespace tt
 
 // Global namespace aliases for log categories
@@ -126,3 +139,20 @@ constexpr tt::LogCategory LogMetal = tt::LogCategory::Metal;
 constexpr tt::LogCategory LogSiliconDriver = tt::LogCategory::SiliconDriver;
 constexpr tt::LogCategory LogEmulationDriver = tt::LogCategory::EmulationDriver;
 constexpr tt::LogCategory LogCustom = tt::LogCategory::Custom;
+
+// Assertion macros
+#ifdef NDEBUG
+#define TT_ASSERT(condition, ...)
+#else
+#define TT_ASSERT(condition, ...) \
+    do { \
+        if (not(condition)) [[unlikely]] \
+            TT_LOG_FATAL("Assertion failed: {}", #condition, ##__VA_ARGS__); \
+    } while (0)
+#endif
+
+#define TT_FATAL(condition, ...) \
+    do { \
+        if (not(condition)) [[unlikely]] \
+            TT_LOG_FATAL("Fatal error: {}", #condition, ##__VA_ARGS__); \
+    } while (0)
