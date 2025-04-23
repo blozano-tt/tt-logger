@@ -20,7 +20,7 @@ jobs:
     - name: Build Project
       run: |
         cmake -B build -DCMAKE_BUILD_TYPE=Release
-        cmake --build build
+        cmake --build build --parallel
 
     - name: Run Tests
       run: |
