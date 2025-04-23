@@ -7,14 +7,6 @@ A simple logging library built on top of spdlog.
 - Singleton-based logger instance
 - Thread-safe logging
 - Colored console output
-- Multiple log levels (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
-- Easy to use macros for logging
-
-## Dependencies
-
-- spdlog (automatically managed via CPM)
-
-## Building
 
 ```bash
 # Create build directory
