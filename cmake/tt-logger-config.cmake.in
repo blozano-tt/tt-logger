@@ -1,0 +1,14 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Find spdlog dependency
+find_dependency(spdlog REQUIRED)
+
+# Include the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@-targets.cmake")
+
+# Verify that the namespaced target exists
+if(NOT TARGET @PROJECT_NAME@::@PROJECT_NAME@)
+    message(FATAL_ERROR "Target @PROJECT_NAME@::@PROJECT_NAME@ not found")
+endif() 
