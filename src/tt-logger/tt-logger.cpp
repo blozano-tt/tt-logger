@@ -1,6 +1,7 @@
 #include "tt-logger/tt-logger.hpp"
 #include <cstdlib>
 #include <cstring>
+#include <mutex>
 
 namespace tt {
 namespace {
@@ -67,10 +68,19 @@ Logger& Logger::getInstance() {
 
 // Get logger for a custom category
 std::shared_ptr<spdlog::logger> Logger::getOrCreateLogger(LogCategory category) {
-    std::lock_guard<std::mutex> lock(mutex_);
+    // First check without lock
     if (loggers_.count(category)) {
         return loggers_[category];
     }
+    
+    // Only lock if we need to create
+    std::lock_guard<std::mutex> lock(mutex_);
+    
+    // Check again after lock
+    if (loggers_.count(category)) {
+        return loggers_[category];
+    }
+    
     auto logger = spdlog::stdout_color_mt(to_string(category));
     // \033[36m is cyan for timestamp
     // \033[35m is magenta for logger name

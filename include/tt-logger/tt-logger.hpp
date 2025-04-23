@@ -2,11 +2,12 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-#include <memory>
-#include <unordered_map>
-#include <string>
-#include <mutex>
+
 #include <array>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <unordered_map>
 
 namespace tt {
 
