@@ -5,14 +5,17 @@ A simple logging library built on top of spdlog.
 ## Features
 
 - Singleton-based logger instance
-- Thread-safe logging
+- Thread-safe logging with double-checked locking
 - Colored console output
 - Multiple log levels (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
+- Category-based logging (Device, Model, Runtime, etc.)
 - Easy to use macros for logging
+- File and line number tracking for trace logs
 
 ## Dependencies
 
 - spdlog (automatically managed via CPM)
+- Catch2 (for tests)
 
 ## Building
 
@@ -25,6 +28,9 @@ cd build
 cmake ..
 cmake --build .
 
+# Run tests
+ctest
+
 # Install (optional)
 cmake --install .
 ```
@@ -35,16 +41,53 @@ cmake --install .
 #include <tt-logger/tt-logger.hpp>
 
 int main() {
-    // Initialize the logger
-    tt::Logger::getInstance().initialize("my-app");
+    // Get logger instance
+    auto& logger = tt::Logger::getInstance();
     
-    // Use the logging macros
-    TT_LOG_INFO("Hello, world!");
-    TT_LOG_ERROR("Something went wrong: {}", error_code);
+    // Set global log level
+    logger.setLevel(tt::LogLevel::Debug);
+    
+    // Set specific category level
+    logger.setLevel(tt::LogCategory::Device, tt::LogLevel::Info);
+    
+    // Log with categories
+    TT_LOG_INFO_CAT(tt::LogCategory::Device, "Device message");
+    TT_LOG_DEBUG_CAT(tt::LogCategory::Model, "Model debug message");
+    
+    // Set default category
+    tt::Logger::setDefaultCategory(tt::LogCategory::Device);
+    
+    // Log using default category
+    TT_LOG_INFO("Default category message");
+    
+    // Trace logging (includes file and line)
+    TT_LOG_TRACE_CAT(tt::LogCategory::Device, "Trace message");
     
     return 0;
 }
 ```
+
+## Available Categories
+
+- Always
+- Device
+- Model
+- Runtime
+- Loader
+- IO
+- Compile
+- Build
+- Verification
+- Golden
+- Operation
+- HLK
+- Graph
+- Dispatch
+- Fabric
+- Metal
+- SiliconDriver
+- EmulationDriver
+- Custom
 
 ## CMake Integration
 
@@ -55,7 +98,7 @@ Add to your project's CMakeLists.txt:
 include(cmake/CPM.cmake)
 
 # Add tt-logger
-CPMAddPackage("gh:your-username/tt-logger@0.1.0")
+CPMAddPackage("gh:blozano-tt/tt-logger@0.1.0")
 
 # Link to your target
 target_link_libraries(your_target PRIVATE tt-logger::tt-logger)
@@ -71,6 +114,9 @@ tt-logger/
 ├── src/
 │   └── tt-logger/
 │       └── tt-logger.cpp
+├── tests/
+│   ├── tt-logger-test.cpp
+│   └── CMakeLists.txt
 ├── cmake/
 │   ├── CPM.cmake
 │   └── get_cpm.cmake
