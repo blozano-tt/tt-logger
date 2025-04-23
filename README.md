@@ -11,11 +11,32 @@ A simple logging library built on top of spdlog.
 - Category-based logging (Device, Model, Runtime, etc.)
 - Easy to use macros for logging
 - File and line number tracking for trace logs
+- Environment variable configuration
 
 ## Dependencies
 
 - spdlog (automatically managed via CPM)
 - Catch2 (for tests)
+
+## Configuration
+
+### Environment Variables
+
+The logger can be configured using the following environment variable:
+
+- `TT_LOG_LEVEL`: Sets the default log level for all loggers. Valid values are:
+  - `trace`
+  - `debug`
+  - `info`
+  - `warning`
+  - `error`
+  - `critical`
+  - `off`
+
+Example:
+```bash
+export TT_LOG_LEVEL=debug
+```
 
 ## Building
 
