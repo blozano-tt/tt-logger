@@ -16,7 +16,7 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-        src/${PROJECT_NAME}.cpp
+        src/${PROJECT_NAME}/${PROJECT_NAME}.cpp
 )
 
 target_sources(${PROJECT_NAME}
@@ -91,4 +91,5 @@ install(FILES
 if(BUILD_TESTING)
     enable_testing()
     add_subdirectory(tests)
-endif() 
+endif()
+
