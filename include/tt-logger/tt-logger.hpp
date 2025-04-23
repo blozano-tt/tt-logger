@@ -104,4 +104,25 @@ private:
 #define TT_LOG_ERROR_CAT(category, ...)    TT_LOG_IMPL(error, category, __VA_ARGS__)
 #define TT_LOG_CRITICAL_CAT(category, ...) TT_LOG_IMPL(critical, category, __VA_ARGS__)
 
-} // namespace tt 
+} // namespace tt
+
+// Global namespace aliases for log categories
+constexpr tt::LogCategory LogAlways = tt::LogCategory::Always;
+constexpr tt::LogCategory LogDevice = tt::LogCategory::Device;
+constexpr tt::LogCategory LogModel = tt::LogCategory::Model;
+constexpr tt::LogCategory LogRuntime = tt::LogCategory::Runtime;
+constexpr tt::LogCategory LogLoader = tt::LogCategory::Loader;
+constexpr tt::LogCategory LogIO = tt::LogCategory::IO;
+constexpr tt::LogCategory LogCompile = tt::LogCategory::Compile;
+constexpr tt::LogCategory LogBuild = tt::LogCategory::Build;
+constexpr tt::LogCategory LogVerification = tt::LogCategory::Verification;
+constexpr tt::LogCategory LogGolden = tt::LogCategory::Golden;
+constexpr tt::LogCategory LogOperation = tt::LogCategory::Operation;
+constexpr tt::LogCategory LogHLK = tt::LogCategory::HLK;
+constexpr tt::LogCategory LogGraph = tt::LogCategory::Graph;
+constexpr tt::LogCategory LogDispatch = tt::LogCategory::Dispatch;
+constexpr tt::LogCategory LogFabric = tt::LogCategory::Fabric;
+constexpr tt::LogCategory LogMetal = tt::LogCategory::Metal;
+constexpr tt::LogCategory LogSiliconDriver = tt::LogCategory::SiliconDriver;
+constexpr tt::LogCategory LogEmulationDriver = tt::LogCategory::EmulationDriver;
+constexpr tt::LogCategory LogCustom = tt::LogCategory::Custom;
