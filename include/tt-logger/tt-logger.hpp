@@ -109,13 +109,28 @@ private:
     do { \
         TT_LOG_CRITICAL(__VA_ARGS__); \
         std::exit(EXIT_FAILURE); \
-    } while(0)
+    } while (0)
 
 #define TT_LOG_FATAL_CAT(category, ...) \
     do { \
         TT_LOG_CRITICAL_CAT(category, __VA_ARGS__); \
         std::exit(EXIT_FAILURE); \
-    } while(0)
+    } while (0)
+
+// Throw exception with logging
+#define TT_THROW(...) \
+    do { \
+        std::string msg = fmt::format(__VA_ARGS__); \
+        TT_LOG_CRITICAL("{}", msg); \
+        throw std::runtime_error(msg); \
+    } while (0)
+
+#define TT_THROW_CAT(category, ...) \
+    do { \
+        std::string msg = fmt::format(__VA_ARGS__); \
+        TT_LOG_CRITICAL_CAT(category, "{}", msg); \
+        throw std::runtime_error(msg); \
+    } while (0)
 
 } // namespace tt
 
