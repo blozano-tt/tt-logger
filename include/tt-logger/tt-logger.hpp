@@ -100,7 +100,7 @@ private:
 #define TT_LOG_DEBUG_CAT(category, ...)    TT_LOG_IMPL(debug, category, __VA_ARGS__)
 #endif
 #define TT_LOG_INFO_CAT(category, ...)     TT_LOG_IMPL(info, category, __VA_ARGS__)
-#define TT_LOG_WARN_CAT(category, ...)     TT_LOG_IMPL(warn, category, __VA_ARGS__)
+#define TT_LOG_WARNING_CAT(category, ...)     TT_LOG_IMPL(warn, category, __VA_ARGS__)
 #define TT_LOG_ERROR_CAT(category, ...)    TT_LOG_IMPL(error, category, __VA_ARGS__)
 #define TT_LOG_CRITICAL_CAT(category, ...) TT_LOG_IMPL(critical, category, __VA_ARGS__)
 
