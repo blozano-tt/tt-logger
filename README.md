@@ -1,6 +1,6 @@
 # tt-logger
 
-A simple logging library built on top of spdlog.
+A Tenstorrent logging library built on top of spdlog.
 
 ## Features
 
