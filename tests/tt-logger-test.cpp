@@ -2,6 +2,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <tt-logger/tt-logger.hpp>
+#include <stdlib.h>
+#include <thread>
 
 // Mock class to simulate the device scenario
 class MockDevice {
@@ -86,5 +88,23 @@ TEST_CASE("Fatal test logging works", "[logger]") {
     TT_LOG_FATAL_TEST("Test fatal message");
     
     // If we get here, the macro was called successfully
+    REQUIRE(true);
+}
+
+TEST_CASE("Logger can log thread IDs", "[logger]") {
+    // Set environment variable for log level
+    setenv("TT_LOG_LEVEL", "debug", 1);
+    
+    // Get current thread ID
+    auto system_tid = std::this_thread::get_id();
+    
+    // Log a message with thread ID
+    TT_LOG_DEBUG_CAT(
+        tt::LogCategory::Device,
+        "Starting tt_cpuset_allocator constructor now for process_id: {} thread_id: {}",
+        1234,  // Example process ID
+        system_tid);
+    
+    // If we get here without throwing, the logger works
     REQUIRE(true);
 } 
