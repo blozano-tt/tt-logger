@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <fmt/format.h>
 
 #include <array>
 #include <memory>
@@ -86,13 +87,15 @@ private:
 #define TT_LOG_TRACE(...)    ((void)0)
 #define TT_LOG_DEBUG(...)    ((void)0)
 #else
-#define TT_LOG_TRACE(...)    TT_LOG_IMPL(trace, tt::Logger::getDefaultCategory(), __VA_ARGS__ " [{}:{}]", __FILE__, __LINE__)
+#define TT_LOG_TRACE(...)    TT_LOG_IMPL(trace, tt::Logger::getDefaultCategory(), fmt::format(__VA_ARGS__) + fmt::format(" [{}:{}]", __FILE__, __LINE__))
 #define TT_LOG_DEBUG(...)    TT_LOG_IMPL(debug, tt::Logger::getDefaultCategory(), __VA_ARGS__)
 #endif
 #define TT_LOG_INFO(...)     TT_LOG_IMPL(info, tt::Logger::getDefaultCategory(), __VA_ARGS__)
 #define TT_LOG_WARNING(...)  TT_LOG_IMPL(warn, tt::Logger::getDefaultCategory(), __VA_ARGS__)
 #define TT_LOG_ERROR(...)    TT_LOG_IMPL(error, tt::Logger::getDefaultCategory(), __VA_ARGS__)
-#define TT_LOG_CRITICAL(...) TT_LOG_IMPL(critical, tt::Logger::getDefaultCategory(), __VA_ARGS__)
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define TT_LOG_CRITICAL(...) TT_LOG_IMPL(critical, tt::Logger::getDefaultCategory(), fmt::format(__VA_ARGS__) + fmt::format(" [{}:{}]", __FILE__, __LINE__))
 
 // Convenience macros with explicit category
 #ifdef NDEBUG
@@ -103,15 +106,15 @@ private:
 #define TT_LOG_DEBUG_CAT(category, ...)    TT_LOG_IMPL(debug, category, __VA_ARGS__)
 #endif
 #define TT_LOG_INFO_CAT(category, ...)     TT_LOG_IMPL(info, category, __VA_ARGS__)
-#define TT_LOG_WARNING_CAT(category, ...)     TT_LOG_IMPL(warn, category, __VA_ARGS__)
+#define TT_LOG_WARNING_CAT(category, ...)  TT_LOG_IMPL(warn, category, __VA_ARGS__)
 #define TT_LOG_ERROR_CAT(category, ...)    TT_LOG_IMPL(error, category, __VA_ARGS__)
-#define TT_LOG_CRITICAL_CAT(category, ...) TT_LOG_IMPL(critical, category, __VA_ARGS__)
+#define TT_LOG_CRITICAL_CAT(category, ...) TT_LOG_IMPL(critical, category, __VA_ARGS__ " [{}:{}]", __FILE__, __LINE__)
 
 // Fatal logging macros that terminate the program
 #define TT_LOG_FATAL(...) \
     do { \
         TT_LOG_CRITICAL(__VA_ARGS__); \
-        TT_LOG_CRITICAL("{}", tt::Logger::getStackTrace()); \
+        TT_LOG_CRITICAL(tt::Logger::getStackTrace()); \
         std::exit(EXIT_FAILURE); \
     } while (0)
 
@@ -128,7 +131,7 @@ private:
 #define TT_LOG_FATAL_TEST(...) \
     do { \
         TT_LOG_CRITICAL(__VA_ARGS__); \
-        TT_LOG_CRITICAL("{}", tt::Logger::getStackTrace()); \
+        TT_LOG_CRITICAL(tt::Logger::getStackTrace()); \
     } while (0)
 
 #define TT_LOG_FATAL_TEST_CAT(category, ...) \

@@ -9,6 +9,14 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(BUILD_TESTING "Build tests" ON)
 
 include(cmake/CPM.cmake)
+
+CPMAddPackage("gh:fmtlib/fmt#11.1.4") 
+CPMAddPackage(
+    GITHUB_REPOSITORY gabime/spdlog 
+    VERSION 1.15.2 
+    OPTIONS "SPDLOG_FMT_EXTERNAL ON" 
+)
+
 CPMAddPackage("gh:gabime/spdlog@1.15.2")
 
 add_library(${PROJECT_NAME})
@@ -36,6 +44,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         spdlog::spdlog
+        fmt::fmt
 )
 
 # Add -rdynamic for debug builds to enable proper backtrace
