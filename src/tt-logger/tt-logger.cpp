@@ -1,7 +1,14 @@
 #include "tt-logger/tt-logger.hpp"
+#include <array>
 #include <cstdlib>
 #include <cstring>
+#include <cxxabi.h>
+#include <execinfo.h>
+#include <iostream>
+#include <memory>
 #include <mutex>
+#include <regex>
+#include <sstream>
 
 namespace tt {
 namespace {
@@ -59,6 +66,51 @@ spdlog::level::level_enum to_spdlog_level(LogLevel level) {
     }
 }
 
+// Helper function to demangle a C++ symbol name
+static std::string demangle(const char* str) {
+    size_t size = 0;
+    int status = 0;
+    std::string rt(256, '\0');
+    if (1 == sscanf(str, "%*[^(]%*[^_]%255[^)+]", &rt[0])) {
+        char* v = abi::__cxa_demangle(&rt[0], nullptr, &size, &status);
+        if (v) {
+            std::string result(v);
+            free(v);
+            return result;
+        }
+    }
+    return str;
+}
+
+// Get backtrace as vector of strings
+std::vector<std::string> backtrace(int size = 64, int skip = 1) {
+    std::vector<std::string> bt;
+    void** array = (void**)malloc((sizeof(void*) * size));
+    size_t s = ::backtrace(array, size);
+    char** strings = backtrace_symbols(array, s);
+    if (strings == NULL) {
+        std::cout << "backtrace_symbols error." << std::endl;
+        return bt;
+    }
+    for (size_t i = skip; i < s; ++i) {
+        bt.push_back(strings[i]);
+    }
+    free(strings);
+    free(array);
+    return bt;
+}
+
+// Convert backtrace to formatted string
+std::string backtrace_to_string(int size = 64, int skip = 2, const std::string& prefix = "") {
+    std::vector<std::string> bt = backtrace(size, skip);
+    std::stringstream ss;
+    ss << "Stack trace:\n";
+    for (size_t i = 0; i < bt.size(); ++i) {
+        ss << prefix << demangle(bt[i].c_str()) << std::endl;
+    }
+    return ss.str();
+}
+
 } // anonymous namespace
 
 Logger& Logger::getInstance() {
@@ -112,6 +164,10 @@ void Logger::setLevel(LogCategory category, LogLevel level) {
     if (loggers_.count(category)) {
         loggers_[category]->set_level(to_spdlog_level(level));
     }
+}
+
+std::string Logger::getStackTrace() {
+    return backtrace_to_string(64, 2, "  ");
 }
 
 } // namespace tt 

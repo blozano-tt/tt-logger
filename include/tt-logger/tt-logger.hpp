@@ -67,6 +67,9 @@ public:
     // Configure logging level for specific logger
     void setLevel(LogCategory category, LogLevel level);
 
+    // Get stack trace as string
+    static std::string getStackTrace();
+
 private:
     Logger() : default_category_(LogCategory::Custom) {}
     std::unordered_map<LogCategory, std::shared_ptr<spdlog::logger>> loggers_;
@@ -108,20 +111,39 @@ private:
 #define TT_LOG_FATAL(...) \
     do { \
         TT_LOG_CRITICAL(__VA_ARGS__); \
+        TT_LOG_CRITICAL("{}", tt::Logger::getStackTrace()); \
         std::exit(EXIT_FAILURE); \
     } while (0)
 
 #define TT_LOG_FATAL_CAT(category, ...) \
     do { \
         TT_LOG_CRITICAL_CAT(category, __VA_ARGS__); \
+        TT_LOG_CRITICAL_CAT(category, "{}", tt::Logger::getStackTrace()); \
         std::exit(EXIT_FAILURE); \
     } while (0)
+
+// Test-specific macro that mimics TT_LOG_FATAL but doesn't exit
+// Only defined when TT_LOGGER_TESTING is defined
+#ifdef TT_LOGGER_TESTING
+#define TT_LOG_FATAL_TEST(...) \
+    do { \
+        TT_LOG_CRITICAL(__VA_ARGS__); \
+        TT_LOG_CRITICAL("{}", tt::Logger::getStackTrace()); \
+    } while (0)
+
+#define TT_LOG_FATAL_TEST_CAT(category, ...) \
+    do { \
+        TT_LOG_CRITICAL_CAT(category, __VA_ARGS__); \
+        TT_LOG_CRITICAL_CAT(category, "{}", tt::Logger::getStackTrace()); \
+    } while (0)
+#endif
 
 // Throw exception with logging
 #define TT_THROW(...) \
     do { \
         std::string msg = fmt::format(__VA_ARGS__); \
         TT_LOG_CRITICAL("{}", msg); \
+        TT_LOG_CRITICAL("{}", tt::Logger::getStackTrace()); \
         throw std::runtime_error(msg); \
     } while (0)
 
@@ -129,6 +151,7 @@ private:
     do { \
         std::string msg = fmt::format(__VA_ARGS__); \
         TT_LOG_CRITICAL_CAT(category, "{}", msg); \
+        TT_LOG_CRITICAL_CAT(category, "{}", tt::Logger::getStackTrace()); \
         throw std::runtime_error(msg); \
     } while (0)
 

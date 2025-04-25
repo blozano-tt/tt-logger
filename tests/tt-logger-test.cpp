@@ -1,3 +1,5 @@
+#define TT_LOGGER_TESTING
+
 #include <catch2/catch_test_macros.hpp>
 #include <tt-logger/tt-logger.hpp>
 
@@ -76,5 +78,13 @@ TEST_CASE("Trace logging includes file and line info", "[logger]") {
     // device | TRACE    | tests/tt-logger-test.cpp:XX - Test trace message
     // where XX is the line number of the TT_LOG_TRACE_CAT call
     
+    REQUIRE(true);
+}
+
+TEST_CASE("Fatal test logging works", "[logger]") {
+    // Test that the fatal test logging macro can be called
+    TT_LOG_FATAL_TEST("Test fatal message");
+    
+    // If we get here, the macro was called successfully
     REQUIRE(true);
 } 

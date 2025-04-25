@@ -38,6 +38,11 @@ target_link_libraries(${PROJECT_NAME}
         spdlog::spdlog
 )
 
+# Add -rdynamic for debug builds to enable proper backtrace
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_link_options(${PROJECT_NAME} PUBLIC -rdynamic)
+endif()
+
 # Convert project name to use underscores instead of hyphens for library name
 string(REPLACE "-" "_" LIBRARY_NAME ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${LIBRARY_NAME})
