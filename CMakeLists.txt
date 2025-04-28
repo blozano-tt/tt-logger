@@ -1,6 +1,18 @@
 cmake_minimum_required(VERSION 3.14)
 project(tt-logger VERSION 0.2.0 LANGUAGES CXX)
 
+include(cmake/CPM.cmake)
+CPMAddPackage("gh:fmtlib/fmt#11.1.4")
+CPMAddPackage(
+    GITHUB_REPOSITORY gabime/spdlog
+    VERSION 1.15.2
+    OPTIONS
+        "SPDLOG_FMT_EXTERNAL ON"
+        "SPDLOG_INSTALL ON"
+        "BUILD_SHARED_LIBS OFF"
+        "SPDLOG_BUILD_SHARED OFF"
+)
+
 # Header-only library
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
@@ -19,10 +31,13 @@ target_link_libraries(
         fmt::fmt
 )
 
+# Install headers
 install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION include/${PROJECT_NAME})
 
+# Install target
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
 
+# Install export file
 install(
     EXPORT ${PROJECT_NAME}-targets
     FILE ${PROJECT_NAME}-targets.cmake
