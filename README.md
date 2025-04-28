@@ -4,39 +4,13 @@ A Tenstorrent logging library built on top of spdlog and fmt.
 
 ## Features
 
-- Singleton-based logger instance
-- Thread-safe logging with double-checked locking
-- Colored console output
-- Multiple log levels (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
-- Category-based logging (Device, Model, Runtime, etc.)
-- Easy to use macros for logging
-- File and line number tracking for trace logs
-- Environment variable configuration
+- Built on top of spdlog for robust logging infrastructure
 
 ## Dependencies
 
 - spdlog (automatically managed via CPM)
+- fmt (automatically managed via CPM)
 - Catch2 (for tests)
-
-## Configuration
-
-### Environment Variables
-
-The logger can be configured using the following environment variable:
-
-- `TT_LOG_LEVEL`: Sets the default log level for all loggers. Valid values are:
-  - `trace`
-  - `debug`
-  - `info`
-  - `warning`
-  - `error`
-  - `critical`
-  - `off`
-
-Example:
-```bash
-export TT_LOG_LEVEL=debug
-```
 
 ## Building
 
@@ -62,53 +36,50 @@ cmake --install .
 #include <tt-logger/tt-logger.hpp>
 
 int main() {
-    // Get logger instance
-    auto& logger = tt::Logger::getInstance();
-    
-    // Set global log level
-    logger.setLevel(tt::LogLevel::Debug);
-    
-    // Set specific category level
-    logger.setLevel(tt::LogCategory::Device, tt::LogLevel::Info);
-    
-    // Log with categories
-    TT_LOG_INFO_CAT(tt::LogCategory::Device, "Device message");
-    TT_LOG_DEBUG_CAT(tt::LogCategory::Model, "Model debug message");
-    
-    // Set default category
-    tt::Logger::setDefaultCategory(tt::LogCategory::Device);
-    
-    // Log using default category
-    TT_LOG_INFO("Default category message");
-    
-    // Trace logging (includes file and line)
-    TT_LOG_TRACE_CAT(tt::LogCategory::Device, "Trace message");
-    
+    // Log with different levels and categories
+    tt::log_info(tt::LogDevice, "Device message");
+    tt::log_debug(tt::LogModel, "Model debug message");
+    tt::log_warning(tt::LogLLRuntime, "Runtime warning");
+    tt::log_error(tt::LogDevice, "Device error");
+    tt::log_critical(tt::LogModel, "Model critical error");
+
+    // Log with format strings
+    tt::log_info(tt::LogDevice, "Device {} message", 123);
+    tt::log_info(tt::LogModel, "Model {} with {} parameters", "test", 42);
+
+    // Log with default category (LogAlways)
+    tt::log_info("Default category message");
+
     return 0;
 }
 ```
 
 ## Available Categories
+To be refined
 
 - Always
+- Test
+- Timer
 - Device
 - Model
-- Runtime
+- LLRuntime
 - Loader
 - IO
-- Compile
-- Build
-- Verification
+- CompileTrisc
+- BuildKernels
+- Verif
 - Golden
-- Operation
+- Op
 - HLK
-- Graph
+- HLKC
+- Reportify
+- GraphCompiler
 - Dispatch
 - Fabric
 - Metal
+- MetalTrace
 - SiliconDriver
 - EmulationDriver
-- Custom
 
 ## CMake Integration
 
@@ -119,7 +90,7 @@ Add to your project's CMakeLists.txt:
 include(cmake/CPM.cmake)
 
 # Add tt-logger
-CPMAddPackage("gh:blozano-tt/tt-logger@0.1.0")
+CPMAddPackage("gh:blozano-tt/tt-logger@0.2.0")
 
 # Link to your target
 target_link_libraries(your_target PRIVATE tt-logger::tt-logger)
@@ -132,19 +103,27 @@ tt-logger/
 ├── include/
 │   └── tt-logger/
 │       └── tt-logger.hpp
-├── src/
-│   └── tt-logger/
-│       └── tt-logger.cpp
 ├── tests/
 │   ├── tt-logger-test.cpp
 │   └── CMakeLists.txt
 ├── cmake/
-│   ├── CPM.cmake
-│   └── get_cpm.cmake
+│   └── CPM.cmake
 ├── CMakeLists.txt
 └── README.md
 ```
 
 ## License
 
-[Your chosen license]
+Copyright 2024 Tenstorrent Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
