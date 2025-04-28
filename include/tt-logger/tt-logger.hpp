@@ -1,202 +1,155 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <fmt/ranges.h>
 #include <fmt/std.h>
+#include <spdlog/spdlog.h>
 
 #include <array>
-#include <memory>
-#include <mutex>
+#include <cstddef>
+#include <cstdlib>
+#include <stdexcept>
 #include <string>
-#include <unordered_map>
+#include <string_view>
+#include <utility>
+
+#define LOGGER_TYPES \
+    X(Always)        \
+    X(Test)          \
+    X(Timer)         \
+    X(Device)        \
+    X(Model)         \
+    X(LLRuntime)     \
+    X(Loader)        \
+    X(IO)            \
+    X(CompileTrisc)  \
+    X(BuildKernels)  \
+    X(Verif)         \
+    X(Golden)        \
+    X(Op)            \
+    X(HLK)           \
+    X(HLKC)          \
+    X(Reportify)     \
+    X(GraphCompiler) \
+    X(Dispatch)      \
+    X(Fabric)        \
+    X(Metal)         \
+    X(MetalTrace)    \
+    X(SiliconDriver) \
+    X(EmulationDriver)
 
 namespace tt {
 
-enum class LogCategory {
-    Always,
-    Device,
-    Model,
-    Runtime,
-    Loader,
-    IO,
-    Compile,
-    Build,
-    Verification,
-    Golden,
-    Operation,
-    HLK,
-    Graph,
-    Dispatch,
-    Fabric,
-    Metal,
-    SiliconDriver,
-    EmulationDriver,
-    Custom,  // Special category for dynamic categories
-    Count    // Keep track of the number of categories
+// clang-format off
+enum LogType {
+#define X(a) Log ## a,
+    LOGGER_TYPES
+#undef X
+};
+// clang-format on
+
+constexpr std::array<const char *, std::size_t(LogType::LogEmulationDriver) + 1> log_type_names = {
+#define X(name) #name,
+    LOGGER_TYPES
+#undef X
 };
 
-enum class LogLevel {
-    Trace,
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Critical,
-    Off
-};
+constexpr const char * logtype_to_string(LogType logtype) noexcept {
+    return static_cast<std::size_t>(logtype) < log_type_names.size() ?
+               log_type_names[static_cast<std::size_t>(logtype)] :
+               "UnknownType";
+}
 
-class Logger {
-public:
-    static Logger& getInstance();
-
-    // Set default category for logging
-    static void setDefaultCategory(LogCategory category) {
-        getInstance().default_category_ = category;
+// log_trace
+template <typename... Args> inline void log_trace(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    if (spdlog::should_log(spdlog::level::trace)) {
+        spdlog::trace("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
     }
+}
 
-    // Get default category
-    static LogCategory getDefaultCategory() {
-        return getInstance().default_category_;
+template <typename... Args> inline void log_trace(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_trace(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
+
+// log_debug
+template <typename... Args> inline void log_debug(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    if (spdlog::should_log(spdlog::level::debug)) {
+        spdlog::debug("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
     }
+}
 
-    // Get logger for a custom category
-    std::shared_ptr<spdlog::logger> getOrCreateLogger(LogCategory category);
+template <typename... Args> inline void log_debug(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_debug(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
 
-    // Configure logging level for all loggers
-    void setLevel(LogLevel level);
+// log_info
+template <typename... Args> inline void log_info(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    spdlog::info("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
+}
 
-    // Configure logging level for specific logger
-    void setLevel(LogCategory category, LogLevel level);
+template <typename... Args> inline void log_info(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_info(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
 
-    // Get stack trace as string
-    static std::string getStackTrace();
+// log_warning
+template <typename... Args> inline void log_warning(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    spdlog::warn("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
+}
 
-private:
-    Logger() : default_category_(LogCategory::Custom) {}
-    std::unordered_map<LogCategory, std::shared_ptr<spdlog::logger>> loggers_;
-    std::mutex mutex_;
-    LogCategory default_category_;
-};
+template <typename... Args> inline void log_warning(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_warning(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
 
-// Helper macro to handle both with and without category
-#define TT_LOG_IMPL(level, category, ...) \
-    tt::Logger::getInstance().getOrCreateLogger(category)->level(__VA_ARGS__)
+// log_critical
+template <typename... Args> inline void log_critical(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    spdlog::critical("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
+}
 
-// Convenience macros for using a default category
-#ifdef NDEBUG
-#define TT_LOG_TRACE(...)    ((void)0)
-#define TT_LOG_DEBUG(...)    ((void)0)
-#else
-#define TT_LOG_TRACE(...)    TT_LOG_IMPL(trace, tt::Logger::getDefaultCategory(), fmt::format(__VA_ARGS__) + fmt::format(" [{}:{}]", __FILE__, __LINE__))
-#define TT_LOG_DEBUG(...)    TT_LOG_IMPL(debug, tt::Logger::getDefaultCategory(), __VA_ARGS__)
-#endif
-#define TT_LOG_INFO(...)     TT_LOG_IMPL(info, tt::Logger::getDefaultCategory(), __VA_ARGS__)
-#define TT_LOG_WARNING(...)  TT_LOG_IMPL(warn, tt::Logger::getDefaultCategory(), __VA_ARGS__)
-#define TT_LOG_ERROR(...)    TT_LOG_IMPL(error, tt::Logger::getDefaultCategory(), __VA_ARGS__)
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-#define TT_LOG_CRITICAL(...) TT_LOG_IMPL(critical, tt::Logger::getDefaultCategory(), fmt::format(__VA_ARGS__) + fmt::format(" [{}:{}]", __FILE__, __LINE__))
+template <typename... Args> inline void log_critical(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_critical(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
 
-// Convenience macros with explicit category
-#ifdef NDEBUG
-#define TT_LOG_TRACE_CAT(category, ...)    ((void)0)
-#define TT_LOG_DEBUG_CAT(category, ...)    ((void)0)
-#else
-#define TT_LOG_TRACE_CAT(category, ...)    TT_LOG_IMPL(trace, category, __VA_ARGS__ " [{}:{}]", __FILE__, __LINE__)
-#define TT_LOG_DEBUG_CAT(category, ...)    TT_LOG_IMPL(debug, category, __VA_ARGS__)
-#endif
-#define TT_LOG_INFO_CAT(category, ...)     TT_LOG_IMPL(info, category, __VA_ARGS__)
-#define TT_LOG_WARNING_CAT(category, ...)  TT_LOG_IMPL(warn, category, __VA_ARGS__)
-#define TT_LOG_ERROR_CAT(category, ...)    TT_LOG_IMPL(error, category, __VA_ARGS__)
-#define TT_LOG_CRITICAL_CAT(category, ...) TT_LOG_IMPL(critical, category, __VA_ARGS__ " [{}:{}]", __FILE__, __LINE__)
+// log_error
+template <typename... Args> inline void log_error(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    spdlog::error("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
+}
 
-// Fatal logging macros that terminate the program
-#define TT_LOG_FATAL(...) \
-    do { \
-        TT_LOG_CRITICAL(__VA_ARGS__); \
-        TT_LOG_CRITICAL(tt::Logger::getStackTrace()); \
-        std::exit(EXIT_FAILURE); \
-    } while (0)
+template <typename... Args> inline void log_error(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_error(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
 
-#define TT_LOG_FATAL_CAT(category, ...) \
-    do { \
-        TT_LOG_CRITICAL_CAT(category, __VA_ARGS__); \
-        TT_LOG_CRITICAL_CAT(category, "{}", tt::Logger::getStackTrace()); \
-        std::exit(EXIT_FAILURE); \
-    } while (0)
+}  // namespace tt
 
-// Test-specific macro that mimics TT_LOG_FATAL but doesn't exit
-// Only defined when TT_LOGGER_TESTING is defined
-#ifdef TT_LOGGER_TESTING
-#define TT_LOG_FATAL_TEST(...) \
-    do { \
-        TT_LOG_CRITICAL(__VA_ARGS__); \
-        TT_LOG_CRITICAL(tt::Logger::getStackTrace()); \
-    } while (0)
-
-#define TT_LOG_FATAL_TEST_CAT(category, ...) \
-    do { \
-        TT_LOG_CRITICAL_CAT(category, __VA_ARGS__); \
-        TT_LOG_CRITICAL_CAT(category, "{}", tt::Logger::getStackTrace()); \
-    } while (0)
-#endif
-
-// Throw exception with logging
-#define TT_THROW(...) \
-    do { \
+#define TT_THROW(...)                               \
+    do {                                            \
         std::string msg = fmt::format(__VA_ARGS__); \
-        TT_LOG_CRITICAL("{}", msg); \
-        TT_LOG_CRITICAL("{}", tt::Logger::getStackTrace()); \
-        throw std::runtime_error(msg); \
+        ::tt::log_critical("{}", msg);              \
+        throw std::runtime_error(msg);              \
     } while (0)
-
-#define TT_THROW_CAT(category, ...) \
-    do { \
-        std::string msg = fmt::format(__VA_ARGS__); \
-        TT_LOG_CRITICAL_CAT(category, "{}", msg); \
-        TT_LOG_CRITICAL_CAT(category, "{}", tt::Logger::getStackTrace()); \
-        throw std::runtime_error(msg); \
-    } while (0)
-
-} // namespace tt
-
-// Global namespace aliases for log categories
-constexpr tt::LogCategory LogAlways = tt::LogCategory::Always;
-constexpr tt::LogCategory LogDevice = tt::LogCategory::Device;
-constexpr tt::LogCategory LogModel = tt::LogCategory::Model;
-constexpr tt::LogCategory LogRuntime = tt::LogCategory::Runtime;
-constexpr tt::LogCategory LogLoader = tt::LogCategory::Loader;
-constexpr tt::LogCategory LogIO = tt::LogCategory::IO;
-constexpr tt::LogCategory LogCompile = tt::LogCategory::Compile;
-constexpr tt::LogCategory LogBuild = tt::LogCategory::Build;
-constexpr tt::LogCategory LogVerification = tt::LogCategory::Verification;
-constexpr tt::LogCategory LogGolden = tt::LogCategory::Golden;
-constexpr tt::LogCategory LogOperation = tt::LogCategory::Operation;
-constexpr tt::LogCategory LogHLK = tt::LogCategory::HLK;
-constexpr tt::LogCategory LogGraph = tt::LogCategory::Graph;
-constexpr tt::LogCategory LogDispatch = tt::LogCategory::Dispatch;
-constexpr tt::LogCategory LogFabric = tt::LogCategory::Fabric;
-constexpr tt::LogCategory LogMetal = tt::LogCategory::Metal;
-constexpr tt::LogCategory LogSiliconDriver = tt::LogCategory::SiliconDriver;
-constexpr tt::LogCategory LogEmulationDriver = tt::LogCategory::EmulationDriver;
-constexpr tt::LogCategory LogCustom = tt::LogCategory::Custom;
 
 // Assertion macros
 #ifdef NDEBUG
 #define TT_ASSERT(condition, ...)
 #else
-#define TT_ASSERT(condition, ...) \
-    do { \
-        if (not(condition)) [[unlikely]] \
-            TT_LOG_FATAL("Assertion failed: {}", #condition, ##__VA_ARGS__); \
-    } while (0)
+#    define TT_ASSERT(condition, ...) TT_FATAL(condition __VA_OPT__(, ) __VA_ARGS__)
 #endif
 
-#define TT_FATAL(condition, ...) \
-    do { \
-        if (not(condition)) [[unlikely]] \
-            TT_LOG_FATAL("Fatal error: {}", #condition, ##__VA_ARGS__); \
+#define TT_FATAL(condition, ...)                                                            \
+    do {                                                                                    \
+        if (!(condition)) [[unlikely]] {                                                    \
+            ::tt::log_error("Condition failed: {}" __VA_OPT__(, ) __VA_ARGS__, #condition); \
+            std::abort();                                                                   \
+        }                                                                                   \
     } while (0)
+
+// Custom formatter for LogType
+namespace fmt {
+template <> struct formatter<tt::LogType> : fmt::formatter<std::string_view> {
+    template <typename FormatContext> constexpr auto format(tt::LogType logtype, FormatContext & ctx) const {
+        return fmt::formatter<std::string_view>::format(tt::logtype_to_string(logtype), ctx);
+    }
+};
+}  // namespace fmt
+
+#undef LOGGER_TYPES
