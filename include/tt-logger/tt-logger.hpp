@@ -114,6 +114,18 @@ template <typename... Args> inline void log_critical(fmt::format_string<Args...>
     log_critical(LogType::LogAlways, fmt, std::forward<Args>(args)...);
 }
 
+// log_fatal
+template <typename... Args>
+[[noreturn]] inline void log_fatal(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+    spdlog::critical("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
+    std::abort();
+}
+
+// Without LogType (defaults to LogAlways)
+template <typename... Args> [[noreturn]] inline void log_fatal(fmt::format_string<Args...> fmt, Args &&... args) {
+    log_fatal(LogType::LogAlways, fmt, std::forward<Args>(args)...);
+}
+
 // log_error
 template <typename... Args> inline void log_error(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
     spdlog::error("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
