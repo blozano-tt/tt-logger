@@ -141,7 +141,7 @@ template <typename... Args> inline void log_error(fmt::format_string<Args...> fm
 
 #define TT_FATAL(condition, ...)                                                            \
     do {                                                                                    \
-        if (!(condition)) [[unlikely]] {                                                    \
+        if (!(condition)) {                                                                 \
             ::tt::log_error("Condition failed: {}" __VA_OPT__(, ) __VA_ARGS__, #condition); \
             std::abort();                                                                   \
         }                                                                                   \
