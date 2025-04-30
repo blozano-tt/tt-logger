@@ -19,10 +19,9 @@ jobs:
 
     - name: Build Project
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=Debug
+        cmake -B build -DCMAKE_BUILD_TYPE=Debug -DTT_LOGGER_BUILD_TESTING=ON
         cmake --build build --parallel
 
     - name: Run Tests
       run: |
         ctest -V --test-dir build
-
