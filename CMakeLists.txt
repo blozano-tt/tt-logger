@@ -7,7 +7,7 @@ CPMAddPackage(
     GITHUB_REPOSITORY gabime/spdlog
     VERSION 1.15.2
     OPTIONS
-        "SPDLOG_FMT_EXTERNAL ON"
+        "SPDLOG_FMT_EXTERNAL_HO ON"
         "SPDLOG_INSTALL ON"
 )
 
