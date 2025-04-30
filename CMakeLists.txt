@@ -5,15 +5,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(cmake/CPM.cmake)
-CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4 OPTIONS "BUILD_SHARED_LIBS OFF")
+CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4)
 CPMAddPackage(
     GITHUB_REPOSITORY gabime/spdlog
     VERSION 1.15.2
     OPTIONS
         "SPDLOG_FMT_EXTERNAL ON"
         "SPDLOG_INSTALL ON"
-        "BUILD_SHARED_LIBS OFF"
-        "SPDLOG_BUILD_SHARED OFF"
 )
 
 # Header-only library
@@ -30,8 +28,8 @@ target_include_directories(
 target_link_libraries(
     ${PROJECT_NAME}
     INTERFACE
-        spdlog::spdlog
-        fmt::fmt
+        spdlog::spdlog_header_only
+        fmt::fmt-header-only
 )
 
 # Install headers
