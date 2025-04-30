@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(tt-logger VERSION 0.2.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 include(cmake/CPM.cmake)
 CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4)
 CPMAddPackage(
