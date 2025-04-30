@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(cmake/CPM.cmake)
-CPMAddPackage("gh:fmtlib/fmt#11.1.4")
+CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4 OPTIONS "BUILD_SHARED_LIBS OFF")
 CPMAddPackage(
     GITHUB_REPOSITORY gabime/spdlog
     VERSION 1.15.2
