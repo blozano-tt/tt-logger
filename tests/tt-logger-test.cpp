@@ -1,6 +1,8 @@
+#include <fmt/std.h>  // needed for filesystem::path formatting
 #include <spdlog/sinks/base_sink.h>
 
 #include <catch2/catch_test_macros.hpp>
+#include <filesystem>
 #include <sstream>
 #include <string>
 #include <tt-logger/tt-logger.hpp>
@@ -110,6 +112,12 @@ TEST_CASE("Format string functionality", "[logger]") {
     SECTION("Multiple arguments") {
         tt::log_info(tt::LogModel, "Model {} with {} parameters", "test", 42);
         soft_check_log_contains(sink.get(), "[Model] Model test with 42 parameters");
+    }
+
+    SECTION("Filesystem path formatting") {
+        std::filesystem::path p = "/usr/bin/hello";
+        tt::log_info(tt::LogModel, "Path: {}", p);
+        soft_check_log_contains(sink.get(), "[Model] Path: /usr/bin/hello");
     }
 }
 
