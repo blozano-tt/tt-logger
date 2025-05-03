@@ -174,25 +174,3 @@ TEST_CASE("Default log type behavior", "[logger]") {
         soft_check_log_contains(sink.get(), "[Always] Default type message");
     }
 }
-
-TEST_CASE("Error handling macros", "[logger]") {
-    auto sink = setup_logger();
-
-    SECTION("TT_THROW throws and logs") {
-#ifdef TT_LOGGER_TESTING
-        try {
-            TT_THROW("Test error message");
-            FAIL("Expected exception not thrown");
-        } catch (const std::runtime_error & e) {
-            REQUIRE(std::string(e.what()) == "Test error message");
-            soft_check_log_contains(sink.get(), "[Always] Test error message");
-        }
-#else
-        SUCCEED();
-#endif
-    }
-
-    SECTION("TT_FATAL compiles") {
-        SUCCEED();  // Can't test abort() in unit test
-    }
-}

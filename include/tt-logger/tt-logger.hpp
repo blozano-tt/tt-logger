@@ -115,7 +115,6 @@ template <typename... Args> inline void log_critical(fmt::format_string<Args...>
 template <typename... Args>
 [[noreturn]] inline void log_fatal(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
     spdlog::critical("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
-    std::abort();
 }
 
 // Without LogType (defaults to LogAlways)
@@ -133,28 +132,6 @@ template <typename... Args> inline void log_error(fmt::format_string<Args...> fm
 }
 
 }  // namespace tt
-
-#define TT_THROW(...)                               \
-    do {                                            \
-        std::string msg = fmt::format(__VA_ARGS__); \
-        ::tt::log_critical("{}", msg);              \
-        throw std::runtime_error(msg);              \
-    } while (0)
-
-// Assertion macros
-#ifdef NDEBUG
-#define TT_ASSERT(condition, ...)
-#else
-#    define TT_ASSERT(condition, ...) TT_FATAL(condition __VA_OPT__(, ) __VA_ARGS__)
-#endif
-
-#define TT_FATAL(condition, ...)                                                            \
-    do {                                                                                    \
-        if (!(condition)) {                                                                 \
-            ::tt::log_error("Condition failed: {}" __VA_OPT__(, ) __VA_ARGS__, #condition); \
-            std::abort();                                                                   \
-        }                                                                                   \
-    } while (0)
 
 // Custom formatter for LogType
 namespace fmt {
