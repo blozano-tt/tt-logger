@@ -6,6 +6,40 @@ A Tenstorrent logging library built on top of spdlog and fmt.
 
 - Built on top of spdlog for robust logging infrastructure
 
+## Log levels
+Log level is explicit in the API call.
+
+| tt-logger API        | spdlog Function       | Level      | Description                                                                                         | When to Use                                                                          |
+|----------------------|------------------------|------------|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `log_trace(...)`     | `spdlog::trace()`      | `trace`    | Very detailed debug info. Useful for tracing program flow or variable changes in critical sections. | In development only, deep-dive into complex logic, loops, or performance paths.      |
+| `log_debug(...)`     | `spdlog::debug()`      | `debug`    | General debugging messages.                                                                         | For diagnostics during development. Should be compiled out or disabled in release.   |
+| `log_info(...)`      | `spdlog::info()`       | `info`     | General operational messages.                                                                       | To report expected events, like startup/shutdown, config details, or progress.       |
+| `log_warning(...)`   | `spdlog::warn()`       | `warn`     | Something unexpected but not immediately harmful.                                                   | For soft failures, fallbacks, deprecated usage, or retry scenarios.                  |
+| `log_error(...)`     | `spdlog::error()`      | `error`    | An error occurred, affecting the current operation.                                                 | For recoverable errors like failed file loads, failed RPCs, etc.                     |
+| `log_critical(...)`  | `spdlog::critical()`   | `critical` | Severe error. Program may not continue safely.                                                      | For unrecoverable states: corrupt data, system errors, fatal initialization failure. |
+
+### Error vs Critical
+
+`error`: Something has gone wrong, but the system may be able to continue. It might or might not recover.
+
+Examples:
+
+- A file failed to open
+
+- A network call timed out
+
+- A configuration was invalid but defaulted
+
+`critical`: A serious failure that usually makes the application unstable or unable to continue running safely.
+
+Examples:
+
+- Out-of-memory
+
+- Corrupted internal state
+
+- Failed assertion or invariant violation
+
 ## Dependencies
 
 - spdlog (automatically managed via CPM)
