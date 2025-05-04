@@ -3,6 +3,10 @@ project(tt-logger VERSION 0.2.0 LANGUAGES CXX)
 
 include(cmake/CPM.cmake)
 CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4)
+
+# Hack for packaging spdlog in debian
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME spdlog-dev)
+
 CPMAddPackage(
     GITHUB_REPOSITORY gabime/spdlog
     VERSION 1.15.2
@@ -10,6 +14,8 @@ CPMAddPackage(
         "SPDLOG_FMT_EXTERNAL_HO ON"
         "SPDLOG_INSTALL ON"
 )
+
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${DEFAULT_COMPONENT_NAME})
 
 # Header-only library
 add_library(${PROJECT_NAME} INTERFACE)
