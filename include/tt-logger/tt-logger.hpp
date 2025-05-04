@@ -110,13 +110,12 @@ template <typename... Args> inline void log_critical(fmt::format_string<Args...>
 }
 
 // log_fatal
-template <typename... Args>
-[[noreturn]] inline void log_fatal(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
+template <typename... Args> inline void log_fatal(LogType type, fmt::format_string<Args...> fmt, Args &&... args) {
     spdlog::critical("[{}] {}", type, fmt::format(fmt, std::forward<Args>(args)...));
 }
 
 // Without LogType (defaults to LogAlways)
-template <typename... Args> [[noreturn]] inline void log_fatal(fmt::format_string<Args...> fmt, Args &&... args) {
+template <typename... Args> inline void log_fatal(fmt::format_string<Args...> fmt, Args &&... args) {
     log_fatal(LogType::LogAlways, fmt, std::forward<Args>(args)...);
 }
 
@@ -139,5 +138,4 @@ template <> struct formatter<tt::LogType> : fmt::formatter<std::string_view> {
     }
 };
 }  // namespace fmt
-
 #undef LOGGER_TYPES

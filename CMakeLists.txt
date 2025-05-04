@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.23)
 project(tt-logger VERSION 0.2.0 LANGUAGES CXX)
 
 include(cmake/CPM.cmake)
@@ -15,12 +15,16 @@ CPMAddPackage(
 add_library(${PROJECT_NAME} INTERFACE)
 add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-target_include_directories(
+target_sources(
     ${PROJECT_NAME}
     INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        FILE_SET api
+        TYPE HEADERS
+        BASE_DIRS include
+        FILES include/${PROJECT_NAME}/tt-logger.hpp
 )
+
+target_include_directories(${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 target_link_libraries(
     ${PROJECT_NAME}
@@ -29,16 +33,14 @@ target_link_libraries(
         fmt::fmt-header-only
 )
 
-# Install headers
-install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION include/${PROJECT_NAME} COMPONENT ${PROJECT_NAME}-dev)
-
-# Install target
 install(
     TARGETS
         ${PROJECT_NAME}
     EXPORT ${PROJECT_NAME}-targets
-    COMPONENT
-    ${PROJECT_NAME}-dev
+    FILE_SET
+    api
+        DESTINATION include
+        COMPONENT ${PROJECT_NAME}-dev
 )
 
 # Install export file
