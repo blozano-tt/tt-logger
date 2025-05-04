@@ -30,10 +30,16 @@ target_link_libraries(
 )
 
 # Install headers
-install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION include/${PROJECT_NAME})
+install(DIRECTORY include/${PROJECT_NAME}/ DESTINATION include/${PROJECT_NAME} COMPONENT ${PROJECT_NAME}-dev)
 
 # Install target
-install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
+install(
+    TARGETS
+        ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}-targets
+    COMPONENT
+    ${PROJECT_NAME}-dev
+)
 
 # Install export file
 install(
@@ -41,6 +47,7 @@ install(
     FILE ${PROJECT_NAME}-targets.cmake
     NAMESPACE ${PROJECT_NAME}::
     DESTINATION lib/cmake/${PROJECT_NAME}
+    COMPONENT ${PROJECT_NAME}-dev
 )
 
 include(CMakePackageConfigHelpers)
@@ -62,6 +69,7 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config-version.cmake"
     DESTINATION lib/cmake/${PROJECT_NAME}
+    COMPONENT ${PROJECT_NAME}-dev
 )
 
 # Optional: build tests
