@@ -2,20 +2,20 @@ cmake_minimum_required(VERSION 3.23)
 project(tt-logger VERSION 0.2.0 LANGUAGES CXX)
 
 include(cmake/CPM.cmake)
-CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4)
+if(NOT TARGET fmt::fmt-header-only)
+    CPMAddPackage(NAME fmt GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 11.1.4)
+endif()
 
-# Hack for packaging spdlog in debian
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME spdlog-dev)
-
-CPMAddPackage(
-    GITHUB_REPOSITORY gabime/spdlog
-    VERSION 1.15.2
-    OPTIONS
-        "SPDLOG_FMT_EXTERNAL_HO ON"
-        "SPDLOG_INSTALL ON"
-)
-
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${DEFAULT_COMPONENT_NAME})
+if(NOT TARGET spdlog::spdlog_header_only)
+    CPMAddPackage(
+        NAME spdlog
+        GITHUB_REPOSITORY gabime/spdlog
+        VERSION 1.15.2
+        OPTIONS
+            "SPDLOG_FMT_EXTERNAL_HO ON"
+            "SPDLOG_INSTALL ON"
+    )
+endif()
 
 # Header-only library
 add_library(${PROJECT_NAME} INTERFACE)
