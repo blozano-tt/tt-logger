@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23)
-project(tt-logger VERSION 0.2.0 LANGUAGES CXX)
+project(tt-logger VERSION 0.3.0 LANGUAGES CXX)
 
 include(cmake/CPM.cmake)
 if(NOT TARGET fmt::fmt-header-only)
@@ -39,48 +39,50 @@ target_link_libraries(
         fmt::fmt-header-only
 )
 
-install(
-    TARGETS
-        ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}-targets
-    FILE_SET
-    api
-        DESTINATION include
+option(TT_LOGGER_INSTALL "Configure for installation" OFF)
+if(TT_LOGGER_INSTALL)
+    install(
+        TARGETS
+            ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}-targets
+        FILE_SET
+        api
+            DESTINATION include
+            COMPONENT ${PROJECT_NAME}-dev
+    )
+
+    # Install export file
+    install(
+        EXPORT ${PROJECT_NAME}-targets
+        FILE ${PROJECT_NAME}-targets.cmake
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION lib/cmake/${PROJECT_NAME}
         COMPONENT ${PROJECT_NAME}-dev
-)
+    )
 
-# Install export file
-install(
-    EXPORT ${PROJECT_NAME}-targets
-    FILE ${PROJECT_NAME}-targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION lib/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}-dev
-)
+    include(CMakePackageConfigHelpers)
 
-include(CMakePackageConfigHelpers)
-
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config-version.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-
-configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.cmake"
-    INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
-)
-
-install(
-    FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.cmake"
+    write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config-version.cmake"
-    DESTINATION lib/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}-dev
-)
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
 
-# Optional: build tests
+    configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}-config.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.cmake"
+        INSTALL_DESTINATION lib/cmake/${PROJECT_NAME}
+    )
+
+    install(
+        FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-config-version.cmake"
+        DESTINATION lib/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}-dev
+    )
+endif()
+
 option(TT_LOGGER_BUILD_TESTING "Build tests" OFF)
 if(TT_LOGGER_BUILD_TESTING)
     enable_testing()
